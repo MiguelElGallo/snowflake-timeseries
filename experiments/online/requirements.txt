@@ -1,0 +1,9 @@
+# Python 3.12. Versions used for the local definition/contract/control checks.
+snowflake-ml-python==2.8.0
+snowflake-snowpark-python==1.56.0
+snowflake-connector-python==4.8.1
+pandas==2.3.3
+requests==2.34.2
+PyJWT==2.15.1
+cryptography==50.0.2
+numba==0.68.1

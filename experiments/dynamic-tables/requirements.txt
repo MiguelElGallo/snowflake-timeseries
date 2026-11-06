@@ -1,0 +1,2 @@
+snowflake-connector-python==5.2.0
+snowpipe-streaming==1.9.2

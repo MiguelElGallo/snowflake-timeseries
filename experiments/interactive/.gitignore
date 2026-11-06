@@ -1,0 +1,6 @@
+artifacts/
+__pycache__/
+.venv/
+*.pem
+*.p8
+.env

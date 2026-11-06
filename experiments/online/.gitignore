@@ -1,0 +1,8 @@
+evidence/
+.venv/
+__pycache__/
+*.pyc
+.env
+connections.toml
+*.pem
+*.p8

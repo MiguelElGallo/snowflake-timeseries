@@ -1,0 +1,175 @@
+{
+  "measurement": "Producer send to first observed correct containing minute summary",
+  "poll_interval_seconds": 5,
+  "panel_sensors": [
+    0,
+    1,
+    17,
+    999
+  ],
+  "warmup_event_seconds": 120,
+  "between_run_idle_seconds": 300,
+  "quantiles": "Linear interpolation at (n-1)*p on ascending observations",
+  "scope": "Fixed-minute summaries; final correctness covers every sensor and bucket",
+  "paced_runs": [
+    {
+      "status": "passed",
+      "sensors": 1000,
+      "submitted_events": 1800000,
+      "final_summary_groups": 31000,
+      "maximum_absolute_statistic_error": {
+        "MEAN": 0.0,
+        "STD_POP": 1.7763568394002505e-15,
+        "STD_SAMP": 0.0,
+        "MIN_VALUE": 0.0,
+        "MAX_VALUE": 0.0
+      },
+      "expected_panel_events": 7200,
+      "observed_panel_events": 7200,
+      "unobserved_panel_events": 0,
+      "wall_seconds_including_drain": 1842.8875880420092,
+      "run": 1,
+      "seconds_of_input": 1800,
+      "post_warmup_delay_seconds": {
+        "n": 6720,
+        "p50": 37.18239860396716,
+        "p95": 59.10007429790549,
+        "p99": 62.508206993213385,
+        "max": 67.39815004100092
+      },
+      "warmup_delay_seconds": {
+        "n": 480,
+        "p50": 39.10738668747945,
+        "p95": 57.06965320685412,
+        "p99": 59.05685850000009,
+        "max": 60.06044466700405
+      },
+      "observed_acknowledgement_upper_bound_seconds": {
+        "n": 1800,
+        "p50": 1.0038515829946846,
+        "p95": 2.0043085586192317,
+        "p99": 2.0095550894970073,
+        "max": 2.0154767080093734
+      },
+      "producer_schedule_drift_seconds": {
+        "n": 1800,
+        "p50": 0.007172458543209359,
+        "p95": 0.01417700239981059,
+        "p99": 0.014989970114547758,
+        "max": 0.025092208001296967
+      }
+    },
+    {
+      "status": "passed",
+      "sensors": 1000,
+      "submitted_events": 1800000,
+      "final_summary_groups": 31000,
+      "maximum_absolute_statistic_error": {
+        "MEAN": 0.0,
+        "STD_POP": 0.0,
+        "STD_SAMP": 3.552713678800501e-15,
+        "MIN_VALUE": 0.0,
+        "MAX_VALUE": 0.0
+      },
+      "expected_panel_events": 7200,
+      "observed_panel_events": 7200,
+      "unobserved_panel_events": 0,
+      "wall_seconds_including_drain": 1856.3196227089502,
+      "run": 2,
+      "seconds_of_input": 1800,
+      "post_warmup_delay_seconds": {
+        "n": 6720,
+        "p50": 37.28816299999016,
+        "p95": 59.2360613145749,
+        "p99": 62.68859895872643,
+        "max": 66.27241083298577
+      },
+      "warmup_delay_seconds": {
+        "n": 480,
+        "p50": 36.69795010401867,
+        "p95": 59.28233388994118,
+        "p99": 62.16082750004716,
+        "max": 62.24407062504906
+      },
+      "observed_acknowledgement_upper_bound_seconds": {
+        "n": 1800,
+        "p50": 1.0038324795023073,
+        "p95": 2.0054692836420145,
+        "p99": 2.010021338337101,
+        "max": 2.015474500018172
+      },
+      "producer_schedule_drift_seconds": {
+        "n": 1800,
+        "p50": 0.008308624965138733,
+        "p95": 0.014321046107215806,
+        "p99": 0.015411997001501731,
+        "max": 0.01582737499848008
+      }
+    },
+    {
+      "status": "passed",
+      "sensors": 1000,
+      "submitted_events": 1800000,
+      "final_summary_groups": 31000,
+      "maximum_absolute_statistic_error": {
+        "MEAN": 0.0,
+        "STD_POP": 0.0,
+        "STD_SAMP": 0.0,
+        "MIN_VALUE": 0.0,
+        "MAX_VALUE": 0.0
+      },
+      "expected_panel_events": 7200,
+      "observed_panel_events": 7200,
+      "unobserved_panel_events": 0,
+      "wall_seconds_including_drain": 1851.9505876250332,
+      "run": 3,
+      "seconds_of_input": 1800,
+      "post_warmup_delay_seconds": {
+        "n": 6720,
+        "p50": 36.123846895992756,
+        "p95": 58.10315963266475,
+        "p99": 61.3087718210043,
+        "max": 65.17040704196552
+      },
+      "warmup_delay_seconds": {
+        "n": 480,
+        "p50": 38.90187408399652,
+        "p95": 60.1870117833343,
+        "p99": 62.17272970901104,
+        "max": 62.62886791705387
+      },
+      "observed_acknowledgement_upper_bound_seconds": {
+        "n": 1800,
+        "p50": 1.0039813540061004,
+        "p95": 2.006061804515775,
+        "p99": 2.01225161633105,
+        "max": 2.016181915998459
+      },
+      "producer_schedule_drift_seconds": {
+        "n": 1800,
+        "p50": 0.009163687529508024,
+        "p95": 0.014583547887741587,
+        "p99": 0.015415283750626257,
+        "max": 0.024953083018772304
+      }
+    }
+  ],
+  "burst": {
+    "status": "passed",
+    "sensors": 1000,
+    "submitted_events": 120000,
+    "final_summary_groups": 3000,
+    "maximum_absolute_statistic_error": {
+      "MEAN": 0.0,
+      "STD_POP": 0.0,
+      "STD_SAMP": 0.0,
+      "MIN_VALUE": 0.0,
+      "MAX_VALUE": 0.0
+    },
+    "expected_panel_events": 480,
+    "observed_panel_events": 480,
+    "unobserved_panel_events": 0,
+    "wall_seconds_including_drain": 43.37776604195824,
+    "event_time_seconds": 120
+  }
+}

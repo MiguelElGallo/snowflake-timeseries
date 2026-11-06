@@ -1,0 +1,2 @@
+*.csv text eol=lf
+*.svg whitespace=-blank-at-eol

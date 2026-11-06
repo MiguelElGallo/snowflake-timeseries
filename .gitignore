@@ -1,0 +1,11 @@
+.venv/
+__pycache__/
+*.pyc
+.DS_Store
+.state/
+evidence/
+*.log
+*.pem
+*.p8
+.env
+connections.toml
