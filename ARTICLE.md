@@ -8,7 +8,7 @@ A sensor sends one reading every second. You want its average and standard devia
 
 The streaming pipe tested here can reshape individual messages. Its aggregate definitions were rejected in my trial account. However, Snowflake also describes **Streaming Transformations in private preview**, including aggregation in a SQL pipe before data reaches a table. “Pipes can never aggregate” would therefore be the wrong conclusion.
 
-The announcement does not establish which standard-deviation functions, window boundaries or late-data rules are supported in that preview. Those need separate validation with preview access. [Snowflake's real-time analytics overview](https://www.snowflake.com/en/blog/real-time-analytics-snowflake/).
+The preview was unavailable in the trial: a pipe using the announcement's join pattern was rejected, and the time-window probe reported disabled feature gates. This limits what I could test, not what the preview can do. Its exact standard-deviation functions, window boundaries and late-data rules still need validation with preview access. [Snowflake's real-time analytics overview](https://www.snowflake.com/en/blog/real-time-analytics-snowflake/).
 
 For a reproducible path in the trial, I used Snowpipe Streaming to store readings, then Dynamic Tables to maintain their summaries. A Dynamic Table is a saved SQL result that Snowflake keeps updated.
 
@@ -38,7 +38,7 @@ Creating the summary does **not** stop Snowflake from storing the raw readings. 
 
 The [quickstart](https://github.com/MiguelElGallo/snowflake-timeseries/tree/main/quickstart) creates an isolated database and an X-Small warehouse. A warehouse is the compute that runs SQL and refreshes the summaries. It uses your existing Snowflake key-pair connection; no credentials belong in the example code.
 
-Check its [prerequisites](https://github.com/MiguelElGallo/snowflake-timeseries/blob/main/quickstart/README.md#prerequisites) first, including the required permissions and the minimal producer's supported key-file format.
+You need Python 3.12, an existing compatible Snowflake key-pair connection, access to high-performance streaming with Elastic Channels, and permission to create a database and warehouse. The X-Small warehouse consumes credits while running. Check the [full prerequisites](https://github.com/MiguelElGallo/snowflake-timeseries/blob/main/quickstart/README.md#prerequisites), including the supported key-file format, before running:
 
 ```bash
 git clone https://github.com/MiguelElGallo/snowflake-timeseries.git
@@ -52,7 +52,9 @@ python quickstart/demo.py seed
 python quickstart/demo.py read
 ```
 
-`setup` creates the objects shown below. `seed` sends real streaming messages and waits for the expected summary; creating a pipe alone does not send any data. The [producer and setup runner](https://github.com/MiguelElGallo/snowflake-timeseries/blob/main/quickstart/demo.py) contains the complete executable code.
+`setup` creates the objects. `seed` sends six messages and waits up to four minutes for the automatically updated summary. Success starts with **PASS: duplicate excluded, invalid value retained as NULL**, followed by five distinct measurements, four valid values, average **25**, population SD about **11.18** and sample SD about **12.91**. `read` prints the summary. Creating a pipe alone does not send data; the [producer and setup runner](https://github.com/MiguelElGallo/snowflake-timeseries/blob/main/quickstart/demo.py) contains the complete executable code.
+
+You now have a working result. The raw table, pipe and two Dynamic Tables explained next are already created by `setup`; you do not need to run those `CREATE` statements again. When you finish exploring, remove the example with `python quickstart/demo.py cleanup`.
 
 A message looks like this:
 
@@ -151,8 +153,6 @@ Keep the count beside the average. An average based on one valid reading tells a
 
 *A real SQL result: equal readings, a single valid reading and no valid readings produce different answers.*
 
-The quickstart adds a fourth valid reading and one malformed value. After removing the replay, it verifies five distinct measurements, four valid values, average 25, population SD about 11.18 and sample SD about 12.91.
-
 The 60-second target is a freshness objective, not a fixed timer or a hard maximum. Snowflake schedules refreshes around the dependency graph and the work required. Its documented minimum target is one minute. [How target lag works](https://docs.snowflake.com/en/user-guide/dynamic-tables/target-lag).
 
 ![Dynamic Tables configured for incremental refresh](assets/dynamic-table-settings.jpg)
@@ -175,7 +175,7 @@ These timings include five-second polling and query delay. Four sensors were obs
 
 At 12:01:30, the current clock-minute bucket contains readings since 12:01:00. The last 60 seconds also includes readings from the second half of the previous minute.
 
-For the latter, use a time filter and group by sensor:
+For the latter, use a time filter and group by sensor. This is an **optional extension**, separate from the tables created by `setup`:
 
 ```sql
 CREATE DYNAMIC TABLE sensor_last_minute
@@ -199,7 +199,7 @@ GROUP BY sensor_id;
 
 This includes readings newer than 60 seconds ago and no later than now. The explicit UTC conversion matches the convention used for the stored timestamps. Simply removing timezone information from a session-local clock can shift the window. [Timestamp types](https://docs.snowflake.com/en/sql-reference/data-types-datetime), [timezone conversion](https://docs.snowflake.com/en/sql-reference/functions/convert_timezone).
 
-Create it with `python quickstart/demo.py moving-window`. The seed example uses a completed minute, so it normally produces no row in this current window. The larger experiment supplies fresh readings to exercise it.
+While the demo resources still exist, create it with `python quickstart/demo.py moving-window`. The seed example uses a completed minute, so it normally produces no row in this current window. The [moving-window guide](https://github.com/MiguelElGallo/snowflake-timeseries/blob/main/docs/how-to-explore.md) explains how to continue after cleanup; the larger experiment supplies fresh readings to exercise it.
 
 Silence matters too. When a sensor stops, its last reading must eventually leave the window. In the idle experiment, the summary disappeared about 103 seconds after the reading's event time, with no new input or manual refresh. That was roughly 43 seconds after the logical expiry, observed by polling. It demonstrates automatic expiry in that configuration, not an exact expiry timer.
 
@@ -285,6 +285,18 @@ Compute can be the larger part:
 These are **uptime budgets, not equal-capacity benchmarks or complete bills**. The trial's standard warehouse used Azure Gen2. The appropriate warehouse, service size and active hours depend on your workload. Rates come from the [consumption table](https://www.snowflake.com/legal-files/CreditConsumptionTable.pdf).
 
 Standard serverless tasks and materialized-view maintenance are priced by the computing resources consumed: respectively 0.9 and 2 credits for work equivalent to an X-Small warehouse running for an hour, before applicable cloud-services charges. A job's elapsed time alone does not tell you that amount. The [cost worksheet](https://github.com/MiguelElGallo/snowflake-timeseries/blob/main/docs/costs.md#serverless-task-and-materialized-view-examples) includes explicit examples.
+
+Here are five separate usage examples for a 30-day month, all assuming $3 per credit. Each row covers only the named charge; the workloads do not promise equivalent results or freshness.
+
+| Component | Explicit usage assumption | Illustrative monthly charge |
+|---|---|---:|
+| Raw streaming ingestion | 1,000 sensors, one reading/second, 100 billable bytes/reading | $2.88 |
+| Summary streaming ingestion | 1,000 sensors, one summary/minute, 200 billable bytes/summary | $0.10 |
+| Occasional SQL on Azure Gen2 XS | 12 billable warehouse minutes/day | $22.50 |
+| Serverless task compute | One task/minute, each consuming 10 XS-equivalent compute-seconds | $324 |
+| Materialized-view maintenance | Two XS-equivalent compute-hours/day | $360 |
+
+“XS-equivalent” measures compute consumed, not elapsed job time. Ingestion, other compute, stored data, applicable cloud-services charges and upstream processing remain separate. The [editable cost tables and formulas](https://github.com/MiguelElGallo/snowflake-timeseries/blob/main/docs/costs.md) let you replace these assumptions with your own.
 
 Standard warehouses have a one-minute minimum whenever they resume. Interactive warehouses have a one-hour minimum and a 24-hour minimum auto-suspend setting; extra clusters and fallback work can add compute charges. Short queries therefore do not necessarily mean short bills. [Standard compute billing](https://docs.snowflake.com/en/user-guide/cost-understanding-compute), [Interactive billing](https://docs.snowflake.com/en/user-guide/interactive#cost-and-billing-considerations).
 

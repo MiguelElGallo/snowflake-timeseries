@@ -54,3 +54,11 @@ python quickstart/demo.py cleanup
 ```
 
 Use the same `--database` and connection options as setup. Do not run these statements in a shared production schema.
+
+## Checking private-preview access
+
+A separate access check used the two-join shape shown in Figure 5 of [Snowflake's Streaming Transformations announcement](https://www.snowflake.com/en/blog/real-time-analytics-snowflake/), alongside scalar, filter and aggregate controls. The scalar pipe definition was accepted. The join and filter definitions were rejected with `002098`, cross-row AVG and STDDEV_POP with `091136`, and an explicit 60-second RANGE window with `002364`, citing disabled feature gates. The disposable database was removed after the check; no warehouse or ingestion was needed.
+
+This establishes that the probed preview capabilities were unavailable through that trial session. It does not establish the preview's general function limits or the account's contractual enrollment status.
+
+There is no documented self-service SQL route to enable this private preview. [`SYSTEM$ENABLE_PREVIEW_ACCESS`](https://docs.snowflake.com/en/sql-reference/functions/system_enable_preview_access) applies to open previews; its usage notes direct private-preview requests to Snowflake Support. The [preview access policy](https://docs.snowflake.com/en/release-notes/preview-features) also directs requests through the Snowflake account team. Eligibility for this particular trial and region needs confirmation from Snowflake.
