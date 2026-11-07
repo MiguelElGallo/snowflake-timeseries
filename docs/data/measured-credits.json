@@ -1,0 +1,131 @@
+{
+  "schema_version": 1,
+  "kind": "reported_experiment_credit_usage",
+  "scope": "Complete metering intervals for seven dedicated experiment warehouse lifetimes and their streaming pipes; collection after documented reporting delays.",
+  "components": [
+    {
+      "key": "main_lab",
+      "label": "Main Dynamic Table lab",
+      "warehouse_compute_credits": "2.406439800",
+      "warehouse_cloud_services_unadjusted_credits": "0.111878347",
+      "warehouse_query_attributed_compute_credits": "1.938393409",
+      "streaming_credits": "0.001496030",
+      "streaming_meter_bytes": 434135275,
+      "streaming_status": "reported",
+      "warehouse_meter_rows": 3,
+      "streaming_meter_rows": 3
+    },
+    {
+      "key": "interactive",
+      "label": "Interactive serving check",
+      "warehouse_compute_credits": "0.600075600",
+      "warehouse_cloud_services_unadjusted_credits": "0.001151110",
+      "warehouse_query_attributed_compute_credits": "0.000538379",
+      "streaming_credits": null,
+      "streaming_meter_bytes": null,
+      "streaming_status": "no_separate_streaming_pipe",
+      "warehouse_meter_rows": 1,
+      "streaming_meter_rows": 0
+    },
+    {
+      "key": "quickstart_a",
+      "label": "Quickstart validation A",
+      "warehouse_compute_credits": "0.072259200",
+      "warehouse_cloud_services_unadjusted_credits": "0.002143055",
+      "warehouse_query_attributed_compute_credits": "0.027582160",
+      "streaming_credits": "2E-9",
+      "streaming_meter_bytes": 542,
+      "streaming_status": "reported",
+      "warehouse_meter_rows": 1,
+      "streaming_meter_rows": 1
+    },
+    {
+      "key": "quickstart_b",
+      "label": "Quickstart validation B",
+      "warehouse_compute_credits": "0.064269000",
+      "warehouse_cloud_services_unadjusted_credits": "0.001398335",
+      "warehouse_query_attributed_compute_credits": "0.016593098",
+      "streaming_credits": "2E-9",
+      "streaming_meter_bytes": 542,
+      "streaming_status": "reported",
+      "warehouse_meter_rows": 2,
+      "streaming_meter_rows": 1
+    },
+    {
+      "key": "portable",
+      "label": "Portable Dynamic Table validation",
+      "warehouse_compute_credits": "0.131664600",
+      "warehouse_cloud_services_unadjusted_credits": "0.014663325",
+      "warehouse_query_attributed_compute_credits": "0.112875071",
+      "streaming_credits": "3.87E-7",
+      "streaming_meter_bytes": 112379,
+      "streaming_status": "reported",
+      "warehouse_meter_rows": 1,
+      "streaming_meter_rows": 1
+    },
+    {
+      "key": "original",
+      "label": "Original pipe and SQL probes",
+      "warehouse_compute_credits": "0.196628400",
+      "warehouse_cloud_services_unadjusted_credits": "0.010167783",
+      "warehouse_query_attributed_compute_credits": "0.103167829",
+      "streaming_credits": "0.000911488",
+      "streaming_meter_bytes": 264506617,
+      "streaming_status": "reported",
+      "warehouse_meter_rows": 1,
+      "streaming_meter_rows": 12
+    },
+    {
+      "key": "support",
+      "label": "Offline checks and earlier billing queries",
+      "warehouse_compute_credits": "0.102135600",
+      "warehouse_cloud_services_unadjusted_credits": "0.005313616",
+      "warehouse_query_attributed_compute_credits": "0.006898299",
+      "streaming_credits": null,
+      "streaming_meter_bytes": null,
+      "streaming_status": "no_separate_streaming_pipe",
+      "warehouse_meter_rows": 3,
+      "streaming_meter_rows": 0
+    }
+  ],
+  "main_warehouse_breakdown": [
+    {
+      "label": "Compute attributed to queries",
+      "credits": "1.938393409"
+    },
+    {
+      "label": "Remaining warehouse compute (includes idle time)",
+      "credits": "0.468046391"
+    },
+    {
+      "label": "Total main-lab warehouse compute",
+      "credits": "2.406439800"
+    }
+  ],
+  "totals": {
+    "warehouse_compute_credits": "3.573472200",
+    "streaming_credits": "0.002407909",
+    "compute_and_streaming_subtotal_credits": "3.575880109",
+    "cloud_services_unadjusted_credits_excluded": "0.146715571"
+  },
+  "query_acceleration_status": "query_succeeded_no_rows_reported",
+  "cloud_services_adjustment_context": "Account-day warehouse cloud-services usage was fully offset; no per-experiment allocation inferred.",
+  "excluded": [
+    "storage",
+    "new credit-collection warehouse",
+    "unallocated account services"
+  ],
+  "limits": [
+    "Main lab includes setup, correctness checks, polling, idle time and sustained ingestion.",
+    "Separate components ran different workloads; this is not an equal-workload benchmark.",
+    "Query-attributed compute is contained in warehouse compute, not an additional charge.",
+    "Online Feature Store and private-preview Streaming Transformations have no successful live benchmark here.",
+    "No conversion to currency, monthly projection or rate-times-runtime calculation."
+  ],
+  "sources": [
+    "SNOWFLAKE.ACCOUNT_USAGE.WAREHOUSE_METERING_HISTORY",
+    "SNOWFLAKE.ACCOUNT_USAGE.METERING_HISTORY joined to SNOWFLAKE.ACCOUNT_USAGE.PIPES",
+    "SNOWFLAKE.ACCOUNT_USAGE.QUERY_ACCELERATION_HISTORY",
+    "SNOWFLAKE.ACCOUNT_USAGE.METERING_DAILY_HISTORY (account context only)"
+  ]
+}

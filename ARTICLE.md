@@ -267,51 +267,42 @@ The Online Feature Store has its own ingestion and lookup APIs. With direct stre
 
 I could not benchmark its live behavior: the trial account rejected the compute family required to provision the service. The repository includes the prepared tests and local checks, clearly marked as **not verified against a running online service**. That is an account limitation, not a failed statistics result.
 
-## What do the alternatives cost?
+## What did the experiments actually consume?
 
-Start with four separate costs: ingestion, calculation, serving queries and retained data. A cheap ingestion rate does not describe the whole application.
+Snowflake's usage records show **2.406439800 warehouse compute credits** and **0.001496030 streaming ingestion credits** for the main Dynamic Table lab: **2.407935830 credits combined**. This includes setup, correctness checks, polling, idle time and the 5.52-million-reading protocol. It is the whole lab's usage, not an isolated price for processing those readings.
 
-For 1,000 sensors at one reading per second, assume **100 billable bytes per reading**. That is 259.2 decimal GB over 30 days. At 0.0037 credits per GB for high-performance Snowpipe Streaming, ingestion is about **0.96 credits per month**. At an illustrative $3 per credit, that is **$2.88**. Replace both assumptions with your measured billable volume and contract price. This rate is not an established price for private-preview Streaming Transformations. [Streaming billing](https://docs.snowflake.com/en/user-guide/snowpipe-streaming/snowpipe-streaming-high-performance-cost), [Snowflake's consumption table](https://www.snowflake.com/legal-files/CreditConsumptionTable.pdf).
+Here are the recorded credits for each experiment component. The figures were retrieved after the experiments finished and the documented reporting delays had passed.
 
-Compute can be the larger part:
-
-| Component | Published credit rate | Illustration: running for 720 hours |
+| Experiment component | Warehouse compute credits | Streaming ingestion credits |
 |---|---:|---:|
-| Azure Gen2 standard X-Small warehouse | 1.25/hour | 900 credits; $2,700 at $3/credit |
-| Interactive X-Small warehouse, one cluster | 0.60/hour | 432 credits; $1,296 at $3/credit |
-| Online Feature Store XS baseline | 0.76/hour | 547.2 credits; about $1,642 at $3/credit |
-| Online Feature Store S baseline | 2.66/hour | 1,915.2 credits; about $5,746 at $3/credit |
+| Main Dynamic Table lab | 2.406439800 | 0.001496030 |
+| Interactive serving check | 0.600075600 | — |
+| Quickstart validation A | 0.072259200 | 0.000000002 |
+| Quickstart validation B | 0.064269000 | 0.000000002 |
+| Portable Dynamic Table validation | 0.131664600 | 0.000000387 |
+| Original pipe and SQL probes | 0.196628400 | 0.000911488 |
+| Offline checks and earlier billing queries | 0.102135600 | — |
+| **Tracked subtotal** | **3.573472200** | **0.002407909** |
 
-These are **uptime budgets, not equal-capacity benchmarks or complete bills**. The trial's standard warehouse used Azure Gen2. The appropriate warehouse, service size and active hours depend on your workload. Rates come from the [consumption table](https://www.snowflake.com/legal-files/CreditConsumptionTable.pdf).
+A dash means that component had no separate streaming pipe; it does not represent an unmeasured zero. The Interactive check read existing summaries, so their ingestion is already counted under the main lab. The two tiny quickstart ingestion amounts are positive: **0.000000002 credits each**.
 
-Standard serverless tasks and materialized-view maintenance are priced by the computing resources consumed: respectively 0.9 and 2 credits for work equivalent to an X-Small warehouse running for an hour, before applicable cloud-services charges. A job's elapsed time alone does not tell you that amount. The [cost worksheet](https://github.com/MiguelElGallo/snowflake-timeseries/blob/main/docs/costs.md#serverless-task-and-materialized-view-examples) includes explicit examples.
+Together, tracked warehouse compute and streaming ingestion consumed **3.575880109 credits**. The components ran different workloads, so these rows are separate experiment records, not an equal-workload product comparison. No monthly extrapolation or currency conversion is applied.
 
-Here are five separate usage examples for a 30-day month, all assuming $3 per credit. Each row covers only the named charge; the workloads do not promise equivalent results or freshness.
+The main warehouse's meter also separates compute attributed to queries from the remaining warehouse compute:
 
-| Component | Explicit usage assumption | Illustrative monthly charge |
-|---|---|---:|
-| Raw streaming ingestion | 1,000 sensors, one reading/second, 100 billable bytes/reading | $2.88 |
-| Summary streaming ingestion | 1,000 sensors, one summary/minute, 200 billable bytes/summary | $0.10 |
-| Occasional SQL on Azure Gen2 XS | 12 billable warehouse minutes/day | $22.50 |
-| Serverless task compute | One task/minute, each consuming 10 XS-equivalent compute-seconds | $324 |
-| Materialized-view maintenance | Two XS-equivalent compute-hours/day | $360 |
+| Main-lab warehouse compute | Credits |
+|---|---:|
+| Compute attributed to queries | 1.938393409 |
+| Remaining warehouse compute (includes idle time) | 0.468046391 |
+| Total main-lab warehouse compute | 2.406439800 |
 
-“XS-equivalent” measures compute consumed, not elapsed job time. Ingestion, other compute, stored data, applicable cloud-services charges and upstream processing remain separate. The [editable cost tables and formulas](https://github.com/MiguelElGallo/snowflake-timeseries/blob/main/docs/costs.md) let you replace these assumptions with your own.
+This breakdown is already included in the main lab's **2.406439800** compute credits. Query-attributed compute includes refreshes and other SQL; it is not a separate charge. The remaining compute includes idle time. [Warehouse metering definitions](https://docs.snowflake.com/en/sql-reference/account-usage/warehouse_metering_history).
 
-Standard warehouses have a one-minute minimum whenever they resume. Interactive warehouses have a one-hour minimum and a 24-hour minimum auto-suspend setting; extra clusters and fallback work can add compute charges. Short queries therefore do not necessarily mean short bills. [Standard compute billing](https://docs.snowflake.com/en/user-guide/cost-understanding-compute), [Interactive billing](https://docs.snowflake.com/en/user-guide/interactive#cost-and-billing-considerations).
+**What the subtotal excludes:** storage, the separate warehouse used to retrieve these records, and cloud-services usage and its account-level adjustments. The tracked warehouses reported **0.146715571 unadjusted cloud-services credits**. Snowflake's account-level daily record offset warehouse cloud-services usage in full; I have kept that account adjustment separate instead of allocating it to individual experiments. Query Acceleration returned no usage rows. [Daily credit adjustments](https://docs.snowflake.com/en/sql-reference/account-usage/metering_daily_history).
 
-The rest of the comparison follows what each option does:
+There is no successful live Online Feature Store or Streaming Transformations preview benchmark here, so neither gets an invented cost row. The offline-checks row covers SQL and investigation work, not a running Online service.
 
-- **Queries and views:** pay for SQL compute when results are requested.
-- **Dynamic Tables:** pay for refresh compute, stored results and queries that read them. An Interactive warehouse serving those results is an additional component.
-- **Tasks:** pay for your warehouse or Snowflake-managed task compute. A schedule alone does not determine cost.
-- **Materialized views:** pay for automatic maintenance, storage and query compute.
-- **Online Feature Store:** add storage, any extra capacity and offline processing to the service baseline.
-- **Upstream summaries:** add the device or stream processor, transport and recovery costs.
-
-Snowflake documents these in its [Dynamic Table cost guide](https://docs.snowflake.com/en/user-guide/dynamic-tables/cost), [task compute comparison](https://docs.snowflake.com/en/user-guide/tasks-intro#recommendations-for-choosing-a-compute-model), [materialized-view cost guide](https://docs.snowflake.com/en/user-guide/views-materialized#estimating-and-controlling-costs) and [Online Feature Store billing guide](https://docs.snowflake.com/en/developer-guide/snowflake-ml/feature-store/online-feature-store#cost-and-billing-considerations).
-
-If each minute summary were 200 bytes, sending summaries instead would reduce the illustrative ingestion charge to about **$0.10 per month**. Saving around $2.78 on ingestion alone may not justify another processing service. Reduced history and calculation work could matter more, but you would also lose the raw readings. The [cost worksheet](https://github.com/MiguelElGallo/snowflake-timeseries/blob/main/docs/costs.md) shows the assumptions and formulas.
+The [measured-credit data and method](https://github.com/MiguelElGallo/snowflake-timeseries/blob/main/docs/costs.md) include the editable tables, credit records and SQL needed to repeat the measurement. Streaming credits come from Snowflake's meter, rather than multiplying assumed message sizes by a published rate. [Streaming usage records](https://docs.snowflake.com/en/user-guide/snowpipe-streaming/snowpipe-streaming-high-performance-cost).
 
 ## Start with the answer you need to serve
 

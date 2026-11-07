@@ -1,0 +1,8 @@
+key,label,warehouse_compute_credits,warehouse_cloud_services_unadjusted_credits,warehouse_query_attributed_compute_credits,streaming_credits,streaming_meter_bytes,streaming_status,warehouse_meter_rows,streaming_meter_rows
+main_lab,Main Dynamic Table lab,2.406439800,0.111878347,1.938393409,0.001496030,434135275,reported,3,3
+interactive,Interactive serving check,0.600075600,0.001151110,0.000538379,,,no_separate_streaming_pipe,1,0
+quickstart_a,Quickstart validation A,0.072259200,0.002143055,0.027582160,2E-9,542,reported,1,1
+quickstart_b,Quickstart validation B,0.064269000,0.001398335,0.016593098,2E-9,542,reported,2,1
+portable,Portable Dynamic Table validation,0.131664600,0.014663325,0.112875071,3.87E-7,112379,reported,1,1
+original,Original pipe and SQL probes,0.196628400,0.010167783,0.103167829,0.000911488,264506617,reported,1,12
+support,Offline checks and earlier billing queries,0.102135600,0.005313616,0.006898299,,,no_separate_streaming_pipe,3,0

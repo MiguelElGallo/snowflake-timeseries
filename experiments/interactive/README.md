@@ -38,7 +38,7 @@ This proves only that the tested account could read these already-materialized r
 
 ## Cost and cleanup
 
-An interactive warehouse has a **one-hour minimum billable period** each time it resumes. X-Small is listed at **0.6 credits per cluster-hour**; at an illustrative $3 per credit, its first hour is $1.80. This is a planning minimum, not an observed invoice or an account-specific price. Automatic suspension has a 24-hour minimum, so the script drops the warehouse explicitly after the check. [Billing rules](https://docs.snowflake.com/en/user-guide/interactive#cost-and-billing-considerations), [published consumption rates](https://www.snowflake.com/legal-files/CreditConsumptionTable.pdf).
+The completed Interactive check recorded **0.600075600 warehouse compute credits**, including its minimum billable period. See the [measured credit report](../../docs/costs.md) for scope and separate cloud-services usage. Interactive warehouses have a **one-hour minimum billable period** each time they resume. Automatic suspension has a 24-hour minimum, so the script drops the warehouse explicitly after the check. [Billing rules](https://docs.snowflake.com/en/user-guide/interactive#cost-and-billing-considerations).
 
 The script uses one cluster, refuses existing warehouse names, binds ownership to organization/account/region, and verifies a unique warehouse comment before dropping it. Ownership is cleared after deletion. If creation is rejected, it verifies that no owned warehouse remains. If a network failure leaves creation uncertain, cleanup can recover only the warehouse bearing this run's unique marker.
 

@@ -77,4 +77,4 @@ The schema assumes `(sensor_id, event_id)` identifies one measurement whose valu
 
 To use another database name, pass the same `--database YOUR_NEW_NAME` to every command. `--connections-file` selects another TOML file; `--connection` overrides the environment variable.
 
-For optional branches, use the separate [moving-window and precision recipes](../docs/how-to-explore.md). They require the example resources to exist: run them before cleanup, or create a fresh example first. The [article](../ARTICLE.md) explains the design choices, and the [cost worksheet](../docs/costs.md) lists assumptions and billing units. This tutorial does not measure a complete monthly bill.
+For optional branches, use the separate [moving-window and precision recipes](../docs/how-to-explore.md). They require the example resources to exist: run them before cleanup, or create a fresh example first. The [article](../ARTICLE.md) explains the design choices, and the [credit usage report](../docs/costs.md) records the two completed quickstart validations alongside the larger experiments.

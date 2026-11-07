@@ -1,4 +1,14 @@
-# Curated sustained-workload measurements
+# Curated experiment measurements
+
+## Measured credits
+
+`measured-credits.json` and `measured-credits.csv` contain recorded compute and streaming credits for seven dedicated experiment warehouses and their pipes. Values are decimal strings so very small positive charges remain visible. An empty CSV streaming field (JSON `null`) means the component had no separate streaming pipe; it is not a fabricated zero.
+
+The main warehouse breakdown is a subset of its compute total, and cloud-services usage is separately labelled and excluded from the compute-and-streaming subtotal. These records include setup, checks, polling and idle time. They contain no forecasts, currency conversion, account identifiers or object IDs. See the [credit usage report](../costs.md) for scope, exclusions and the metering SQL.
+
+Regenerate both credit table images with `python examples/draw_tables.py` after installing Matplotlib. The script reads these records directly.
+
+## Sustained-workload freshness
 
 `sustained-results.json` contains the three completed paced runs and the separate burst result. `summary-visibility.csv` contains all 21,600 observed panel-event delays from the paced runs: four synthetic sensors, 1,800 event sequences per sensor, three runs. No successful observations were selected from an incomplete run.
 

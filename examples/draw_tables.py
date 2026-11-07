@@ -1,9 +1,11 @@
 """Render the article's comparison tables for editors without native tables.
 
-Run with matplotlib installed. Values and assumptions match docs/costs.md.
-These illustrations are budgets, not measured bills or capacity comparisons.
+Run with matplotlib installed. Credit tables read the curated experiment meters
+in docs/data/measured-credits.json; no rates or projections are calculated.
 """
 from pathlib import Path
+from decimal import Decimal
+import json
 import textwrap
 
 import matplotlib
@@ -56,27 +58,23 @@ def draw(name, title, subtitle, headers, rows, widths, wraps, footer):
 
 
 def main():
-    draw('cost-compute-table', 'Compute: a 30-day uptime budget',
-         '720 active hours • Assumed price: US$3 per credit • One warehouse cluster / service baseline',
-         ['Component', 'Credits / hour', 'Credits / month', 'US$ / month'],
-         [
-             ['Standard X-Small — Azure Gen2', '1.25', '900', '$2,700'],
-             ['Interactive X-Small', '0.60', '432', '$1,296'],
-             ['Online Feature Store XS', '0.76', '547.2', '$1,641.60'],
-             ['Online Feature Store S', '2.66', '1,915.2', '$5,745.60'],
-         ], [6.7, 2.7, 2.9, 2.9], [36, 15, 17, 16],
-         'Different services and capacity; these are not equivalent-performance offers. Storage and other charges are additional.\nSource: Snowflake Service Consumption Table. Editable figures and formulas: docs/costs.md in the companion repository.')
-    draw('cost-usage-table', 'Monthly charges for five example workloads',
-         'Separate examples for 30 days • Assumed price: US$3 per credit • Each row covers only the named charge',
-         ['Component', 'Explicit usage assumption', 'US$ / month'],
-         [
-             ['Raw streaming ingestion', '1,000 sensors × 1 reading/second; 100 billable bytes/reading', '$2.88'],
-             ['Summary streaming ingestion', '1,000 sensors × 1 summary/minute; 200 billable bytes/summary', '$0.10'],
-             ['Occasional SQL — Azure Gen2 XS', '12 billable warehouse minutes/day', '$22.50'],
-             ['Serverless task compute', '1 task/minute, consuming 10 XS-equivalent compute-seconds each', '$324'],
-             ['Materialized-view maintenance', '2 XS-equivalent compute-hours/day', '$360'],
-         ], [5.3, 7.0, 2.9], [28, 42, 16],
-         'XS-equivalent measures compute consumed, not elapsed job time. These are assumed workloads, not measurements.\nHigh-performance Snowpipe Streaming: 0.0037 credits/GB. Other compute, storage and processing are separate.')
+    data = json.loads((ROOT/'docs/data/measured-credits.json').read_text())
+    fmt = lambda value: format(Decimal(value), '.9f') if value is not None else '—'
+    rows = [[r['label'], fmt(r['warehouse_compute_credits']), fmt(r['streaming_credits'])]
+            for r in data['components']]
+    rows.append(['Tracked subtotal', fmt(data['totals']['warehouse_compute_credits']),
+                 fmt(data['totals']['streaming_credits'])])
+    draw('cost-compute-table', 'Credits recorded during the experiments',
+         'Seven dedicated warehouses and their pipes • Includes setup, validation, polling and idle time',
+         ['Experiment', 'Compute credits', 'Ingestion credits'], rows,
+         [7.8, 3.7, 3.7], [43, 21, 21],
+         'Combined subtotal: 3.575880109 credits. Cloud services, storage and the later billing observer are excluded.\nA dash means no separate streaming pipe. Workloads differ; these are separate experiment records.')
+    draw('cost-usage-table', 'Inside the main lab’s warehouse compute',
+         'Both parts below are already included in the total • Source: Snowflake warehouse metering',
+         ['Main-lab warehouse compute', 'Credits'],
+         [[r['label'], fmt(r['credits'])] for r in data['main_warehouse_breakdown']],
+         [10.4, 4.8], [62, 26],
+         'Query-attributed compute includes refreshes and other SQL. Remaining compute includes idle time.\nThis breakdown is part of the 2.406439800 compute credits, not an additional charge. Ingestion is separate.')
     draw('storage-choices-table', 'What should you keep?',
          'Choose the history you need before choosing how to calculate the summary.',
          ['Storage choice', 'What you gain', 'What you give up / manage'],

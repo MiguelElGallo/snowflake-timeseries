@@ -7,10 +7,10 @@
 -- Use an authorized monitoring role and an existing observer warehouse; these
 -- SELECTs consume compute. Keep observer usage separate from the workload.
 --
--- Provenance: all six sections compiled and executed in the trial on 2026-11-06
--- with owned resource names and a bounded interval. A shared database was listed
--- once in section D. Warehouse/HP sections returned partial meter records; QAS,
--- Online and daily-storage sections did not establish charges for the interval.
+-- The experiment report rechecked warehouse/streaming usage after reporting delays
+-- using complete UTC intervals. Match exact object IDs and names from your own run.
+-- A shared database is listed once in section D. QAS, Online and storage queries
+-- can return no records; preserve that outcome rather than manufacturing zeros.
 -- Reading billing views does not validate a running Online Feature Store backend.
 -- Empty/delayed results or permission errors NEVER establish zero charges.
 -- Do not add the same service from multiple metering views twice.
@@ -28,18 +28,21 @@ WITH bounds AS (
     ('interactive_serving_only', 'TIMESERIES_INTERACTIVE_WH'),
     ('quickstart_validation_only', 'SENSOR_TIMESERIES_DEMO_WH')
 )
-SELECT r.component, r.warehouse_name,
+SELECT r.component, r.warehouse_name, m.warehouse_id,
        COUNT(m.start_time) AS meter_rows,
        IFF(COUNT(m.start_time)=0, 'NO_ROWS_REPORTED_NOT_ZERO', 'ROWS_REPORTED_PARTIAL') AS coverage,
        MIN(m.start_time) AS first_meter_hour, MAX(m.end_time) AS last_meter_hour_end,
        SUM(m.credits_used_compute) AS compute_credits,
+       SUM(m.credits_attributed_compute_queries) AS query_attributed_compute_credits,
+       SUM(m.credits_used_compute)-SUM(m.credits_attributed_compute_queries)
+         AS compute_not_attributed_to_queries,
        SUM(m.credits_used_cloud_services) AS cloud_services_credits,
        SUM(m.credits_used) AS total_unadjusted_credits
 FROM resources r CROSS JOIN bounds b
 LEFT JOIN SNOWFLAKE.ACCOUNT_USAGE.WAREHOUSE_METERING_HISTORY m
   ON m.warehouse_name=r.warehouse_name
  AND m.start_time>=b.start_utc AND m.start_time<b.end_utc
-GROUP BY r.component,r.warehouse_name
+GROUP BY r.component,r.warehouse_name,m.warehouse_id
 ORDER BY r.component;
 
 -- B. High-performance Streaming, attributed to explicitly named pipes.
@@ -169,3 +172,18 @@ WHERE u.organization_name=CURRENT_ORGANIZATION_NAME()
   AND u.usage_date>=b.start_day AND u.usage_date<b.end_day
 GROUP BY u.usage_date,u.service_type,u.rating_type,u.billing_type,u.is_adjustment,u.currency
 ORDER BY u.usage_date,u.currency,u.billing_type,u.is_adjustment;
+
+-- G. Account-day warehouse cloud-services adjustment: context, not experiment allocation.
+-- Do not add these account-wide totals to the resource-filtered rows in section A.
+-- https://docs.snowflake.com/en/sql-reference/account-usage/metering_daily_history
+WITH bounds AS (
+  SELECT CONVERT_TIMEZONE('UTC',TO_TIMESTAMP_TZ('__START_UTC__'))::DATE AS start_day,
+         CONVERT_TIMEZONE('UTC',TO_TIMESTAMP_TZ('__END_UTC__'))::DATE AS end_day
+)
+SELECT 'ACCOUNT_CONTEXT_NOT_EXPERIMENT_ALLOCATION' AS scope,
+       m.usage_date,m.service_type,m.credits_used_compute,
+       m.credits_used_cloud_services,m.credits_adjustment_cloud_services,m.credits_billed
+FROM SNOWFLAKE.ACCOUNT_USAGE.METERING_DAILY_HISTORY m CROSS JOIN bounds b
+WHERE m.service_type='WAREHOUSE_METERING'
+  AND m.usage_date>=b.start_day AND m.usage_date<b.end_day
+ORDER BY m.usage_date;
